@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH -J my_job_name
+#SBATCH -J hello_mpi
 #SBATCH -o %J.out
 #SBATCH -e %J.err
 #SBATCH -n 24
@@ -7,4 +7,4 @@
 #SBATCH -t 5
 #SBATCH --reservation=Summerschool
 
-
+aprun prog

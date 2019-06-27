@@ -50,8 +50,10 @@ contains
     integer :: nx, ny, i
     character(len=2) :: dummy
 
-    ! TODO: implement the file reading
+    open(10, file=filename, status='old', action='read')
+
     ! Read the header
+    read(unit=10, fmt='(1x,2i4)') ny, nx
 
     ! Initialize the field metadata (nx, ny, dx, dy). You can use
     ! the utilite routine set_field_dimensions from module heat

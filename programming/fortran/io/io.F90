@@ -6,6 +6,7 @@ contains
   subroutine read_field(field, filename)
     implicit none
 
+    integer :: nx, ny, i
     real, dimension(:,:), allocatable, intent(out) :: field
     character(len=*), intent(in) :: filename
 
@@ -16,21 +17,17 @@ contains
     ! read rest of the file into field
     ! close the file
 
+    open(10, file=filename, status='old', action='read')
 
+    read(unit=10, fmt='(1x,2i4)') ny, nx
 
+    allocate(field(ny,nx))
 
+    do i = 1, ny
+      read(unit=10, fmt=*) field(i,:)
+    end do
 
-
-
-
-
-
-
-
-
-
-
-
+    close(unit=10)
 
   end subroutine read_field
 

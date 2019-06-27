@@ -48,7 +48,7 @@ contains
     character(len=85), intent(in) :: filename
 
     integer :: nx, ny, i
-    character(len=2) :: dummy
+    !character(len=2) :: dummy
 
     open(10, file=filename, status='old', action='read')
 
@@ -57,15 +57,17 @@ contains
 
     ! Initialize the field metadata (nx, ny, dx, dy). You can use
     ! the utilite routine set_field_dimensions from module heat
+    call set_field_dimensions(field0, nx, ny)
 
     ! Allocate space for the data. The array for temperature field contains 
     ! also a halo region (one layer of extra space in all directions which
     ! is used as boundary condition).
-
-
+    allocate(field0%data(0:ny+1,0:nx+1))
 
     ! Read the data
-
+    do i = 1, ny
+      read(10, fmt=*) field0%data(i,1:nx)
+    end do
 
     ! TODO end
 

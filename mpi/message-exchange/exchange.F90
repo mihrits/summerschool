@@ -1,7 +1,7 @@
 program exchange
   use mpi_f08
   implicit none
-  integer, parameter :: msgsize = 100
+  integer, parameter :: msgsize = 100000
   integer :: rc, myid, ntasks
   type(mpi_status) :: status
   integer :: message(msgsize)
@@ -15,10 +15,14 @@ program exchange
 
   ! TODO: Implement sending and receiving as defined in the assignment
   if (myid == 0) then
-     write(*,'(A10,I3,A10,I3)') 'Rank: ', myid, &
+    call mpi_send(message, msgsize, MPI_INTEGER, 1, 99, MPI_COMM_WORLD, rc)
+    call mpi_recv(receiveBuffer, msgsize, MPI_INTEGER, 1, 99, MPI_COMM_WORLD, MPI_STATUS_IGNORE, rc)
+    write(*,'(A10,I3,A10,I3)') 'Rank: ', myid, &
           ' received ', receiveBuffer(1)
   else if (myid == 1) then
-     write(*,'(A10,I3,A10,I3)') 'Rank: ', myid, &
+    call mpi_recv(receiveBuffer, msgsize, MPI_INTEGER, 0, 99, MPI_COMM_WORLD, MPI_STATUS_IGNORE, rc)
+    call mpi_send(message, msgsize, MPI_INTEGER, 0, 99, MPI_COMM_WORLD, rc)
+    write(*,'(A10,I3,A10,I3)') 'Rank: ', myid, &
           ' received ', receiveBuffer(1)
   end if
 

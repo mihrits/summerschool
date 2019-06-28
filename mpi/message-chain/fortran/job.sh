@@ -5,5 +5,5 @@
 #SBATCH -e err.%j
 #SBATCH -p test
 #SBATCH --nodes=1
-#SBATCH -n=10
+#SBATCH -n 10
 aprun -n 10 ./chain

@@ -4,7 +4,7 @@ program basic
 
   implicit none
   integer, parameter :: msgsize = 10000000
-  integer :: rc, myid, ntasks
+  integer :: rc, myid, ntasks, reciever, sender
   integer :: message(msgsize)
   integer :: receiveBuffer(msgsize)
   type(mpi_status) :: status
@@ -16,10 +16,29 @@ program basic
   call mpi_comm_size(MPI_COMM_WORLD, ntasks, rc)
 
   message = myid
+  receiver = myid+1
+  sender = myid-1
+
+  select case (myid)
+    case (0)
+      receiver = MPI_PROC_NULL
+    case (ntasks-1)
+      sender = MPI_PROC_NULL
+  end select
 
   ! Start measuring the time spent in communication
   call mpi_barrier(mpi_comm_world, rc)
   t0 = mpi_wtime()
+
+  call mpi_sendrecv(message, msgsize, MPI_INTEGER, receiver, myid+1, &
+                    receiveBuffer, msgsize, MPI_INTEGER, sender, myid-1, &
+                    MPI_COMM_WORLD, status, rc)
+
+  ! TODO: finish printout call
+  write(*,'(A6,I3,A20,I8,A,I3,A,I3)') 'I am: ', myid, &
+        ' Sent elements: ', msgsize, '. Tag: ', myid+1, '. Sent to: ', receiver, &
+        '. Received elements: ', msgsize, '. Tag', myid-1, '. Recieved from ', sender
+
 
   ! TODO: Send and receive as defined in the assignment
   if (myid < ntasks-1) then

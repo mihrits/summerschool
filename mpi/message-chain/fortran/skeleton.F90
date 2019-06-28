@@ -23,6 +23,7 @@ program basic
 
   ! TODO: Send and receive as defined in the assignment
   if (myid < ntasks-1) then
+    call mpi_send(message, msgsize, MPI_INTEGER, myid+1, myid+1, MPI_COMM_WORLD, rc)
 
      write(*,'(A10,I3,A20,I8,A,I3,A,I3)') 'Sender: ', myid, &
           ' Sent elements: ', msgsize, &
@@ -30,6 +31,8 @@ program basic
   end if
 
   if (myid > 0) then
+    call mpi_recv(receiveBuffer, msgsize, MPI_INTEGER, myid-1, myid, &
+                  MPI_COMM_WORLD, MPI_STATUS_IGNORE, rc)
 
      write(*,'(A10,I3,A,I3)') 'Receiver: ', myid, &
           ' First element: ', receiveBuffer(1)

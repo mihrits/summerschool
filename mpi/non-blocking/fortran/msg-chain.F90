@@ -39,19 +39,24 @@ program basic
 
   ! TODO: Implement the message passing using non-blocking
   !       sends and receives
+  call mpi_isend(message, msgsize, mpi_integer, destination, myid+1, mpi_comm_world, requests(1), rc)
+  call mpi_irecv(receiveBuffer, msgsize, mpi_integer, source, myid, mpi_comm_world, requests(2), rc)
+  call mpi_waitall(2, requests, status, rc)
 
+  call mpi_get_count(status(1), MPI_INTEGER, count, rc)
   write(*,'(A10,I3,A20,I8,A,I3,A,I3)') 'Sender: ', myid, &
-       ' Sent elements: ', size, &
+       ' Sent elements: ', count,  &
        '. Tag: ', myid + 1, '. Receiver: ', destination
 
   ! TODO: Add here a synchronization call so that you can be sure
   !       that the message has been received
 
-  call mpi_get_count(status(1), MPI_INTEGER, count, rc)
+
+  call mpi_get_count(status(2), MPI_INTEGER, count, rc)
   write(*,'(A10,I3,A20,I8,A,I3,A,I3)') 'Receiver: ', myid, &
        'received elements: ', count, &
-       '. Tag: ', status(1)%MPI_TAG, &
-       '. Sender:   ', status(1)%MPI_SOURCE
+       '. Tag: ', status(2)%MPI_TAG, &
+       '. Sender:   ', status(2)%MPI_SOURCE
 
   ! Finalize measuring the time and print it out
   t1 = mpi_wtime()

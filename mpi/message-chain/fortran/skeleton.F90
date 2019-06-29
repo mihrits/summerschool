@@ -4,7 +4,7 @@ program basic
 
   implicit none
   integer, parameter :: msgsize = 10000000
-  integer :: rc, myid, ntasks, reciever, sender
+  integer :: rc, myid, ntasks, receiver, sender, cnt
   integer :: message(msgsize)
   integer :: receiveBuffer(msgsize)
   type(mpi_status) :: status
@@ -19,43 +19,44 @@ program basic
   receiver = myid+1
   sender = myid-1
 
-  select case (myid)
-    case (0)
-      receiver = MPI_PROC_NULL
-    case (ntasks-1)
-      sender = MPI_PROC_NULL
-  end select
+  if (myid == 0) then
+    sender = MPI_PROC_NULL
+  else if (myid == ntasks-1) then
+    receiver = MPI_PROC_NULL
+  end if
 
   ! Start measuring the time spent in communication
   call mpi_barrier(mpi_comm_world, rc)
   t0 = mpi_wtime()
 
   call mpi_sendrecv(message, msgsize, MPI_INTEGER, receiver, myid+1, &
-                    receiveBuffer, msgsize, MPI_INTEGER, sender, myid-1, &
+                    receiveBuffer, msgsize, MPI_INTEGER, sender, myid, &
                     MPI_COMM_WORLD, status, rc)
 
+  call mpi_get_count(status, MPI_INTEGER, cnt, rc)
   ! TODO: finish printout call
-  write(*,'(A6,I3,A20,I8,A,I3,A,I3)') 'I am: ', myid, &
+  write(*,'(A,I3,2(A,I8,A,I3,A,I3),A,I0,A)') 'I am: ', myid, &
         ' Sent elements: ', msgsize, '. Tag: ', myid+1, '. Sent to: ', receiver, &
-        '. Received elements: ', msgsize, '. Tag', myid-1, '. Recieved from ', sender
+        '. Received elements: ', msgsize, '. Tag', myid-1, '. Recieved from ', sender, &
+        '. I received ', cnt, " elements."
 
 
   ! TODO: Send and receive as defined in the assignment
-  if (myid < ntasks-1) then
-    call mpi_send(message, msgsize, MPI_INTEGER, myid+1, myid+1, MPI_COMM_WORLD, rc)
+  !if (myid < ntasks-1) then
+  !  call mpi_send(message, msgsize, MPI_INTEGER, myid+1, myid+1, MPI_COMM_WORLD, rc)
 
-     write(*,'(A10,I3,A20,I8,A,I3,A,I3)') 'Sender: ', myid, &
-          ' Sent elements: ', msgsize, &
-          '. Tag: ', myid+1, '. Receiver: ', myid+1
-  end if
+  !   write(*,'(A10,I3,A20,I8,A,I3,A,I3)') 'Sender: ', myid, &
+  !        ' Sent elements: ', msgsize, &
+  !        '. Tag: ', myid+1, '. Receiver: ', myid+1
+  !end if
 
-  if (myid > 0) then
-    call mpi_recv(receiveBuffer, msgsize, MPI_INTEGER, myid-1, myid, &
-                  MPI_COMM_WORLD, MPI_STATUS_IGNORE, rc)
+  !if (myid > 0) then
+  !  call mpi_recv(receiveBuffer, msgsize, MPI_INTEGER, myid-1, myid, &
+  !                MPI_COMM_WORLD, MPI_STATUS_IGNORE, rc)
 
-     write(*,'(A10,I3,A,I3)') 'Receiver: ', myid, &
-          ' First element: ', receiveBuffer(1)
-  end if
+  !   write(*,'(A10,I3,A,I3)') 'Receiver: ', myid, &
+  !        ' First element: ', receiveBuffer(1)
+  !end if
 
   ! Finalize measuring the time and print it out
   t1 = mpi_wtime()

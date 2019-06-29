@@ -4,9 +4,11 @@ program coll_exer
 
   integer, parameter :: n_mpi_tasks = 4
 
-  integer :: ntasks, rank, ierr, i, color, sub_comm
+  integer :: ntasks, rank, ierr, i, color, sub_comm, arr(n_mpi_tasks)
   integer, dimension(2*n_mpi_tasks) :: sendbuf, recvbuf
   integer, dimension(2*n_mpi_tasks**2) :: printbuf
+  type(mpi_request) :: request
+  type(mpi_status) :: status
 
   call mpi_init(ierr)
   call mpi_comm_size(MPI_COMM_WORLD, ntasks, ierr)
@@ -28,11 +30,33 @@ program coll_exer
   ! TODO: use a single *non-blocking*
   ! collective communication call (and maybe prepare
   ! some parameters for the call)
+  call mpi_ibcast(sendbuf, 2*n_mpi_tasks, MPI_INTEGER, 0, mpi_comm_world, request, ierr)
   ! TODO: remember to complete the collective
+  call mpi_wait(request, status)
 
   ! Print data that was received
   ! TODO: add correct buffer
-  call print_buffers(...)
+  call print_buffers(sendbuf)
+
+  ! Exercise b 
+  call init_buffers
+  call mpi_iscatter(sendbuf, 2, MPI_INTEGER, recvbuf, 2, mpi_integer, 0, mpi_comm_world, request, ierr)
+  call mpi_wait(request, status)
+  call print_buffers(recvbuf)
+
+  ! Exercise c 
+  arr = (/ 1,1,2,4 /)
+  call init_buffers
+  call mpi_igatherv(sendbuf, arr(rank+1), mpi_integer, recvbuf, arr, (/ 0,1,2,4 /), mpi_integer, &
+                    1, mpi_comm_world, request, ierr)
+  call mpi_wait(request, status)
+  call print_buffers(recvbuf)
+
+  ! Exercise d
+  call init_buffers
+  call mpi_ialltoall(sendbuf, 2, MPI_INTEGER, recvbuf, 2, MPI_INTEGER, MPI_COMM_WORLD, request, ierr)
+  call mpi_wait(request, status)
+  call print_buffers(recvbuf)
 
   call mpi_finalize(ierr)
 

@@ -17,8 +17,22 @@ contains
 
     ! TODO start: implement halo exchange
     ! Send to left, receive from right
+    call mpi_sendrecv(field0%data(:,1), field0%nx, MPI_DOUBLE_PRECISION, &
+                  &   parallel%nleft, 1, &
+                  
+                  &   field0%data(:,field0%ny+1), field0%nx, MPI_DOUBLE_PRECISION, &
+                  &   parallel%nright, 1, &
+                  
+                  &   mpi_comm_world, mpi_status_ignore, ierr)
 
     ! Send to right, receive from left
+    call mpi_sendrecv(field0%data(:,field0%ny), field0%nx, MPI_DOUBLE_PRECISION, &
+                  &   parallel%nright, 1, &
+                  
+                  &   field0%data(:,0), field0%nx, MPI_DOUBLE_PRECISION, &
+                  &   parallel%nleft, 1, &
+                  
+                  &   mpi_comm_world, mpi_status_ignore, ierr)
 
     ! TODO end
 

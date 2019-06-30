@@ -1,5 +1,5 @@
 ifeq ($(COMP),)
-COMP=cray
+COMP=gnu
 endif
 
 COMMONDIR=../../common

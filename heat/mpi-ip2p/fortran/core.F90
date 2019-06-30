@@ -15,6 +15,18 @@ contains
     type(parallel_data), intent(inout) :: parallel
     integer :: ierr
     ! TODO
+    ! Receive from left and right
+    call mpi_irecv(field0%data(:,0), field0%nx, mpi_double_precision, parallel%nleft, mpi_any_tag, &
+                &  mpi_comm_world, parallel%requests(1), ierr)
+    call mpi_irecv(field0%data(:,field0%ny+1), field0%nx, mpi_double_precision, &
+                &  parallel%nright, mpi_any_tag, mpi_comm_world, parallel%requests(2), ierr)
+
+    ! Send to left and right
+    call mpi_isend(field0%data(:,1), field0%nx, mpi_double_precision, parallel%nleft, 1, &
+                &  mpi_comm_world, parallel%requests(3), ierr)
+    call mpi_isend(field0%data(:,field0%ny), field0%nx, mpi_double_precision, parallel%nright, 1, &
+                &  mpi_comm_world, parallel%requests(4), ierr)
+
   end subroutine exchange_init
 
   ! Compute one time step of temperature evolution
@@ -34,6 +46,16 @@ contains
     ny = curr%ny
 
     ! TODO
+    do j = 2, ny-1
+      do i = 1, nx
+        curr%data(i, j) = prev%data(i, j) + a * dt * &
+              & ((prev%data(i-1, j) - 2.0 * prev%data(i, j) + &
+              &   prev%data(i+1, j)) / curr%dx**2 + &
+              &  (prev%data(i, j-1) - 2.0 * prev%data(i, j) + &
+              &   prev%data(i, j+1)) / curr%dy**2)
+      end do
+    end do
+
   end subroutine evolve_interior
 
   ! Finalize the non-blocking communication
@@ -41,9 +63,11 @@ contains
     use mpi_f08
     implicit none
     type(parallel_data), intent(inout) :: parallel
+    type(mpi_status) :: statuses(4)
     integer :: ierr
 
     ! TODO
+    call mpi_waitall(4, parallel%requests, statuses, ierr)
   end subroutine exchange_finalize
 
   ! Compute one time step of temperature evolution
@@ -65,6 +89,15 @@ contains
     ny = curr%ny
 
     ! TODO
+    do j = 1, ny, ny-1
+        do i = 1, nx
+           curr%data(i, j) = prev%data(i, j) + a * dt * &
+                & ((prev%data(i-1, j) - 2.0 * prev%data(i, j) + &
+                &   prev%data(i+1, j)) / curr%dx**2 + &
+                &  (prev%data(i, j-1) - 2.0 * prev%data(i, j) + &
+                &   prev%data(i, j+1)) / curr%dy**2)
+        end do
+     end do
 
   end subroutine evolve_edges
 

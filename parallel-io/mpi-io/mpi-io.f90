@@ -24,8 +24,9 @@ program pario
   localsize = datasize / ntasks
   allocate(localvector(localsize))
 
-  localvector = [(i + my_id * localsize, i=1,localsize)]
+  !localvector = [(i + my_id * localsize, i=1,localsize)]
 
+  call mpiio_reader()
   call mpiio_writer()
 
   deallocate(localvector)
@@ -45,6 +46,39 @@ contains
     !       rank should write their own local vectors to correct
     !       locations in the output file.
 
+    call mpi_file_open(mpi_comm_world, 'mpiio.dat', mpi_mode_create+mpi_mode_wronly, &
+                    &  mpi_info_null, fh, rc)
+
+    offset = my_id * localsize * dsize
+    call mpi_file_seek(fh, offset, mpi_seek_set, rc)
+
+    call mpi_file_write_all(fh, localvector, localsize, mpi_integer, mpi_status_ignore, rc)
+                
+    call mpi_file_close(fh, rc)
+
   end subroutine mpiio_writer
 
+  subroutine mpiio_reader()
+    implicit none
+    integer :: rc, dsize
+    type(mpi_file) :: fh
+    integer(kind=MPI_OFFSET_KIND) :: offset;
+
+    call mpi_type_size(MPI_INTEGER, dsize, rc)
+
+    ! TODO: write the output file "mpiio.dat" using MPI IO. Each
+    !       rank should write their own local vectors to correct
+    !       locations in the output file.
+
+    call mpi_file_open(mpi_comm_world, 'input_mpiio.dat', mpi_mode_rdonly, &
+                    &  mpi_info_null, fh, rc)
+
+    offset = my_id * localsize * dsize
+    call mpi_file_seek(fh, offset, mpi_seek_set, rc)
+
+    call mpi_file_read_all(fh, localvector, localsize, mpi_integer, mpi_status_ignore, rc)
+                
+    call mpi_file_close(fh, rc)
+
+  end subroutine mpiio_reader
 end program pario

@@ -7,6 +7,7 @@ program pario
   integer :: rc, my_id, ntasks, localsize, i
   integer, dimension(:), allocatable :: localvector
   integer, dimension(datasize) :: fullvector
+  character(len=30) :: filename
 
   call mpi_init(rc)
   call mpi_comm_size(mpi_comm_world, ntasks, rc)
@@ -60,6 +61,13 @@ contains
       write(20,*) fullvector
       close(20)
     end if
+
+    write(filename, '(A23,I2.2,A4)') 'mass_output/output_rank', my_id, '.txt'
+    !open(30+my_id, file='mass_output/output_'//my_id//'.txt', status='new', action='write')
+    open(30+my_id, file=filename, status='new', action='write')
+    write(30+my_id,*) localvector
+    close(30+my_id)
+
 
 
 

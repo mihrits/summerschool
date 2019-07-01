@@ -14,12 +14,14 @@ program vectorsum
   end do
 
   sumex = nx*(nx+1_ik)/2_ik
-  write(*,*) 'Arithmetic sum formula (exact):                  ', sumex
+  write(*,'(A40,I15)') 'Arithmetic sum formula (exact):                  ', sumex
 
   sum = 0
   ! TODO: Parallelize the computation
+  !$omp parallel do schedule(dynamic) private(i)
   do i = 1, nx
      sum = sum + vecA(i)
   end do
-  write(*,*) 'Sum: ', sum
+  !$omp end parallel do
+  write(*,'(A40,I15)') 'Sum:                                                        ', sum
 end program vectorsum

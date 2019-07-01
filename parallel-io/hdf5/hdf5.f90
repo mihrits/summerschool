@@ -47,14 +47,14 @@ contains
     call h5pset_fapl_mpio_f(property_list, MPI_COMM_WORLD, MPI_INFO_NULL, errc)
     call h5fcreate_f("data.h5", H5F_ACC_TRUNC_F, file_handle, errc, &
          & access_prp=property_list)
-    call h5pclose_f(property_list, errc)
+    !call h5pclose_f(property_list, errc)
 
     ! Create the dataset
     dims = datasize
     call h5screate_simple_f(1, dims, file_space, errc)
     call h5dcreate_f(file_handle, 'data', H5T_NATIVE_INTEGER, &
          & file_space, dataset_id, errc)
-    call h5sclose_f(file_space, errc)
+    !call h5sclose_f(file_space, errc)
 
     ! Select a hyperslab of the file dataspace
     counts = localsize

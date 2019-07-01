@@ -39,6 +39,29 @@ contains
 
     ! TODO: Implement a function that writers the whole array of elements
     !       to a file so that single process is responsible for the file io
+    !if (my_id /= 0) then
+    !  call mpi_send(localvector, localsize, mpi_integer, 0, 0, mpi_comm_world, rc)
+    !else
+    !  fullvector(1:localsize) = localvector
+    !  do i = 1, ntasks-1
+    !    call mpi_recv(fullvector(i*localsize+1:(i+1)*localsize+1), localsize, mpi_integer, &
+    !                & i, mpi_any_tag, mpi_comm_world, mpi_status_ignore, rc)
+    !  end do
+
+    !  open(10, file='output.txt', status='new', action='write')
+    !  write(10,*) fullvector
+    !  close(10)
+    !end if
+
+    call mpi_gather(localvector, localsize, mpi_integer, fullvector, localsize, mpi_integer, &
+                &   0, mpi_comm_world, rc)
+    if (my_id == 0) then
+      open(20, file='output.txt', status='new', action='write')
+      write(20,*) fullvector
+      close(20)
+    end if
+
+
 
   end subroutine single_writer
 

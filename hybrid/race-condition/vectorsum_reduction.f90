@@ -18,15 +18,10 @@ program vectorsum
 
   sum = 0
   ! TODO: Parallelize the computation
-  !$omp parallel private(i, psum)
-  !$omp do schedule(dynamic) 
+  !$omp parallel do schedule(dynamic) private(i) reduction(+:sum)
   do i = 1, nx
-     psum = psum + vecA(i)
+     sum = sum + vecA(i)
   end do
-  !$omp end do
-  !$omp critical(finish_sum)
-    sum = sum + psum
-  !$omp end critical(finish_sum)
-  !$omp end parallel 
+  !$omp end parallel do
   write(*,'(A40,I15)') 'Sum:                                                        ', sum
 end program vectorsum

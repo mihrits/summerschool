@@ -58,7 +58,7 @@ contains
     prevdata => prev%data
 
     ! TODO: use OpenACC to parallelise the loops
-    !$acc parallel loop collapse
+    !$acc parallel loop collapse(2)
     do j = 1, ny
        do i = 1, nx
           currdata(i, j) = prevdata(i, j) + a * dt * &

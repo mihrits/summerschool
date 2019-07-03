@@ -22,7 +22,7 @@ program heat_solve
 
   !$omp parallel private(iter)
   call initialize(current, previous, nsteps)
-
+  
   ! Draw the picture of the initial state
   !$omp single
   call write_field(current, 0)

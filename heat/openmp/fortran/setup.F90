@@ -87,7 +87,7 @@ contains
     ! Square of the disk radius
     radius2 = (field0%nx / 6.0_dp)**2
 
-    !$omp do
+    !$omp do collapse(2)
     do j = 0, field0%ny + 1
        do i = 0, field0%nx + 1
           ds2 = int((i - field0%nx / 2.0_dp + 1)**2 + &
